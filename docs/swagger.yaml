@@ -1,0 +1,437 @@
+basePath: /api/v1
+definitions:
+  models.DeployNotificationRequest:
+    properties:
+      app:
+        type: string
+      argocd_url:
+        type: string
+      event_type:
+        type: string
+      finished_at:
+        type: string
+      health_status:
+        type: string
+      message:
+        type: string
+      repo_url:
+        type: string
+      revision:
+        type: string
+      revision_url:
+        type: string
+      started_at:
+        type: string
+      status:
+        type: string
+      sync_status:
+        type: string
+    required:
+    - app
+    type: object
+  models.DeployNotificationResponse:
+    properties:
+      app:
+        type: string
+      message:
+        type: string
+    type: object
+  models.EmailRequest:
+    properties:
+      body:
+        type: string
+      subject:
+        type: string
+      to:
+        type: string
+    required:
+    - body
+    - subject
+    - to
+    type: object
+  models.EmailResponse:
+    properties:
+      message:
+        type: string
+      to:
+        type: string
+    type: object
+  models.EmailSuccessResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.EmailResponse'
+      message:
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  models.ErrorResponseSwagger:
+    properties:
+      error:
+        example: bad_request
+        type: string
+      message:
+        example: Ошибка
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  models.PasswordResetEmailRequest:
+    properties:
+      reset_url:
+        type: string
+      to:
+        type: string
+    required:
+    - reset_url
+    - to
+    type: object
+  models.TelegramSendRequest:
+    properties:
+      message:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    required:
+    - message
+    - title
+    - user_id
+    type: object
+  models.TelegramSendResponse:
+    properties:
+      message:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.VerificationEmailRequest:
+    properties:
+      code:
+        type: string
+      to:
+        type: string
+    required:
+    - code
+    - to
+    type: object
+  models.WelcomeEmailRequest:
+    properties:
+      to:
+        type: string
+      user_name:
+        type: string
+    required:
+    - to
+    - user_name
+    type: object
+  models.WorkspaceInviteEmailRequest:
+    properties:
+      accept_url:
+        type: string
+      expires_at:
+        type: string
+      inviter_name:
+        type: string
+      locale:
+        type: string
+      to:
+        type: string
+      workspace_name:
+        type: string
+    required:
+    - accept_url
+    - expires_at
+    - inviter_name
+    - to
+    - workspace_name
+    type: object
+info:
+  contact: {}
+  description: Сервис отправки email-уведомлений Markerloop
+  title: Notification Service API
+  version: "1.0"
+paths:
+  /notifications/deploy:
+    post:
+      consumes:
+      - application/json
+      description: Принимает уведомление о деплое и пересылает подписанным пользователям
+        через бот.
+      parameters:
+      - description: Данные деплоя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.DeployNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DeployNotificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      summary: Deploy notification (ArgoCD webhook)
+      tags:
+      - deploy
+  /notifications/email/send:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет произвольный email. Service-to-service endpoint.
+      parameters:
+      - description: Данные email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.EmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      security:
+      - ServiceKey: []
+      summary: Отправить email
+      tags:
+      - email
+  /notifications/email/send-password-reset:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет email с ссылкой для сброса пароля. Service-to-service
+        endpoint.
+      parameters:
+      - description: Email и URL сброса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.PasswordResetEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      security:
+      - ServiceKey: []
+      summary: Отправить email сброса пароля
+      tags:
+      - email
+  /notifications/email/send-verification:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет email с кодом верификации. Service-to-service endpoint.
+      parameters:
+      - description: Email и код
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerificationEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      security:
+      - ServiceKey: []
+      summary: Отправить email верификации
+      tags:
+      - email
+  /notifications/email/send-welcome:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет welcome email новому пользователю. Service-to-service
+        endpoint.
+      parameters:
+      - description: Email и имя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WelcomeEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      security:
+      - ServiceKey: []
+      summary: Отправить приветственный email
+      tags:
+      - email
+  /notifications/internal/email/test:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет тестовое письмо для проверки SMTP. Требует X-Service-Key.
+      parameters:
+      - description: Ключ сервиса
+        in: header
+        name: X-Service-Key
+        required: true
+        type: string
+      - description: Email получателя (to)
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      summary: Тестовый email (service-to-service)
+      tags:
+      - email
+  /notifications/internal/email/workspace-invite:
+    post:
+      consumes:
+      - application/json
+      description: 'Отправляет приглашение в рабочее пространство на указанный адрес.
+        Требует X-Service-Key. Локали: ru, en, kk (по умолчанию en).'
+      parameters:
+      - description: Ключ сервиса
+        in: header
+        name: X-Service-Key
+        required: true
+        type: string
+      - description: Данные приглашения
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkspaceInviteEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.EmailSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      summary: Письмо-приглашение в рабочее пространство (service-to-service)
+      tags:
+      - email
+  /notifications/telegram/send:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет Telegram уведомление пользователю через бот. Service-to-service
+        endpoint.
+      parameters:
+      - description: Данные сообщения
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TelegramSendRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TelegramSendResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseSwagger'
+      security:
+      - ServiceKey: []
+      summary: Отправить Telegram сообщение
+      tags:
+      - telegram
+securityDefinitions:
+  ServiceKey:
+    description: Ключ для service-to-service аутентификации
+    in: header
+    name: X-Service-Key
+    type: apiKey
+swagger: "2.0"
