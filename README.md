@@ -52,8 +52,8 @@ Base path: `/api/v1/notifications`
 | POST | `/deploy` | Deploy webhook → Telegram alert via markerloop-bot (used by CI regress alerts, SDL-132) |
 | GET | `/health` | Service health status |
 
-Все `/email/*` и `/deploy` закрыты service-to-service аутентификацией
-(заголовок `X-Service-Key`); их зовут другие сервисы, не пользователи.
+Every `/email/*` route and `/deploy` require service-to-service authentication (the `X-Service-Key` header): they are
+called by other services, never by end users.
 
 ## Configuration (Env Vars)
 | Variable | Default | Description |
